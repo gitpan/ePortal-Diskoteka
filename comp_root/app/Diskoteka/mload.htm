@@ -1,0 +1,43 @@
+%#============================================================================
+%# ePortal - WEB Based daily organizer
+%# Author - S.Rusakov <rusakov_sa@users.sourceforge.net>
+%#
+%# Copyright (c) 2000-2003 Sergey Rusakov.  All rights reserved.
+%# This program is free software; you can redistribute it
+%# and/or modify it under the same terms as Perl itself.
+%#
+%#
+%#----------------------------------------------------------------------------
+<%perl>
+my $app = $ePortal->Application('Diskoteka');
+
+my $result;
+try {
+  $app->UploadMedium(diskname => $diskname,
+    append => !$first_req,
+    source => $source,
+    file => \@file  );
+
+} catch ePortal::Exception with {
+  my $E = shift;
+  $result = 'Error: ' . ref($E) . ': '. $E;
+
+} finally {
+  $result = 'OK' if ! $result;
+};
+
+$m->print($result);
+</%perl>
+
+%#=== @METAGS attr =========================================================
+<%attr>
+Layout => 'Nothing'
+</%attr>
+
+%#=== @METAGS args =========================================================
+<%args>
+$first_req => 1
+$diskname => undef
+$source => undef
+@file => ()
+</%args>

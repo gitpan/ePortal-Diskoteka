@@ -1,0 +1,80 @@
+%#============================================================================
+%# ePortal - WEB Based daily organizer
+%# Author - S.Rusakov <rusakov_sa@users.sourceforge.net>
+%#
+%# Copyright (c) 2000-2003 Sergey Rusakov.  All rights reserved.
+%# This program is free software; you can redistribute it
+%# and/or modify it under the same terms as Perl itself.
+%#
+%#
+%#----------------------------------------------------------------------------
+<& navigator.mc &>
+<p>
+
+%#----------------------------------------------------------------------------
+%# Search form
+%#----------------------------------------------------------------------------
+
+<& /item_caption.mc, title => pick_lang(rus => "Поиск", eng => "Search") &>
+<form name="theForm" method="GET">
+<div align="center">
+<span class="smallfont">
+<% pick_lang(rus => "Что искать?", eng => "Text to search") %>:
+</span>
+<% CGI::textfield({-name => 'text', -size => 15, -class=>"dlgfield", -value=>$ARGS{text}}) %>
+<% CGI::popup_menu({-name => 'area', -values => ['all','products','mediums','files'],
+    -default => $ARGS{area},
+    -labels => {all => 'везде', products => 'в продуктах', mediums=>'в носителях', files => 'в файлах'}}) %>
+
+%#<input type="text" name="text" size="15" class="dlgfield" value="<% $ARGS{text} %>">
+<input type="submit" name="bt_search" class="button" value="<% pick_lang(rus => "Искать!", eng => "Search!") %>">
+</div>
+</form>
+
+<script language="Javascript">
+<!--
+ document.theForm.text.focus();
+// -->
+</script>
+
+%#----------------------------------------------------------------------------
+%# search results
+%#----------------------------------------------------------------------------
+
+% if ($ARGS{text}) {
+
+% if ($ARGS{area} eq 'all' or $ARGS{area} eq 'products') {
+  <p>
+  <& show_products.mc,
+    title => pick_lang(rus => "Продукты", eng => "Software"),
+    extra => pick_lang(rus => "Результаты поиска в программных продуктах", eng => "Searching in software"),
+    url => '/app/Diskoteka/product_view.htm?product_id=#id#',
+    text => $ARGS{text} &>
+% }
+
+% if ($ARGS{area} eq 'all' or $ARGS{area} eq 'mediums') {
+  <p>
+  <& show_mediums.mc,
+    title => pick_lang(rus => "Носители", eng => "Mediums"),
+    extra => pick_lang(rus => "Результаты поиска в носителях информации", eng => "Searching in mediums"),
+    url => '/app/Diskoteka/medium_view.htm?medium_id=#id#',
+    text => $ARGS{text} &>
+% }
+
+% if ($ARGS{area} eq 'all' or $ARGS{area} eq 'files') {
+  <p>
+  <& show_files.mc,
+    title => pick_lang(rus => "Файлы", eng => "Files"),
+    extra => pick_lang(rus => "Результаты поиска в файлах", eng => "Searching in files"),
+    text => $ARGS{text} &>
+% }
+
+% }
+
+
+%#=== @METAGS attr =========================================================
+<%attr>
+Title => {rus => "Поиск", eng => "Search"}
+</%attr>
+
+

@@ -1,0 +1,111 @@
+%#============================================================================
+%# ePortal - WEB Based daily organizer
+%# Author - S.Rusakov <rusakov_sa@users.sourceforge.net>
+%#
+%# Copyright (c) 2000-2003 Sergey Rusakov.  All rights reserved.
+%# This program is free software; you can redistribute it
+%# and/or modify it under the same terms as Perl itself.
+%#
+%#
+%#----------------------------------------------------------------------------
+<& navigator.mc, medium_id => $ARGS{medium_id} &>
+<%perl>
+  my $medium_id = $ARGS{medium_id};
+  my $parent_id = $ARGS{parent_id};
+
+  my $M = new ePortal::App::Diskoteka::Medium;
+  if ( ! $M->restore($medium_id)) {
+    $m->comp("/message.mc", ErrorMessage => "Medium not found");
+    return;
+  }
+
+  my $F = $M->stMediumContent;
+  $F->restore_where();
+</%perl>
+
+<p>
+<span class="memo">
+% my $memo = $M->memo;
+% $memo =~ s/\n/<br>/og;
+<% $memo %>
+</span>
+
+<p>
+<& /item_caption.mc,
+    title => pick_lang(rus => "Содержимое носителя", eng => "Medium content"),
+    extra => $M->Title &>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr>
+  <th class="smallfont" width="50"></th><% empty_td(width=>4) %>
+  <th class="smallfont">Name</th><% empty_td(width=>4) %>
+  <th class="smallfont">Files</th><% empty_td(width=>4) %>
+  <th class="smallfont">Size</th><% empty_td(width=>4) %>
+  <th class="smallfont">Memo</th>
+</tr>
+% while($F->restore_next) {
+  <tr>
+    <td align="right">
+    <% img(src=>'/images/icons/dir.gif') %>
+    </td><% empty_td(width=>4) %>
+    <td class="smallfont"><a
+      href="<% href('medium_view.htm', medium_id => $medium_id, parent_id => $F->id) %>#files">
+    <% $F->Title |h %></a></td><% empty_td(width=>4) %>
+    <td class="smallfont" align="right" bgcolor="#FFFFF0"><% $F->files_count %></td><% empty_td(width=>4) %>
+    <td class="smallfont" align="right" bgcolor="#F0FFF0"><% $F->files_size %></td><% empty_td(width=>4) %>
+    <td class="memo" bgcolor="#F0FFFF"><% $F->Memo %>
+    <% img(src=>'/images/ePortal/edit.gif', href=>href('file_edit.htm', objid=>$F->id)) %>
+    </td><% empty_td(width=>4) %>
+  </tr>
+% }
+</table>
+<p>
+
+
+<a name="files"></a>
+% if ($parent_id) {
+  <%perl>
+    my $PARENT = new ePortal::App::Diskoteka::File;
+    $PARENT->restore($parent_id);
+    if ( $PARENT->FileType eq 'file' ) {
+      $PARENT->restore($PARENT->Parent_id);
+    }
+
+    my $FILES = new ePortal::App::Diskoteka::File;
+    $FILES->restore_where(medium_id => $medium_id, parent_id => $PARENT->id, filetype => 'file');
+  </%perl>
+<& /item_caption.mc, title => pick_lang(rus => "Содержимое папки ".$PARENT->Title, eng => "Folder content".$PARENT->Title) &>
+
+<table cellspacing="0" cellpadding="0" border="0">
+<tr>
+  <th class="smallfont" width="50"></th><% empty_td(width=>4) %>
+  <th class="smallfont">Name</th><% empty_td(width=>4) %>
+  <th class="smallfont">Size</th><% empty_td(width=>4) %>
+  <th class="smallfont">Date</th><% empty_td(width=>4) %>
+  <th class="smallfont">Memo</th>
+</tr>
+% while($FILES->restore_next) {
+  <tr>
+    <td align="right">
+    <% img(src=>'/images/icons/generic.gif') %>
+    </td><% empty_td(width=>4) %>
+    <td class="smallfont"><% $FILES->Title |h %></td><% empty_td(width=>4) %>
+    <td class="smallfont" align="right" bgcolor="#F0FFF0"><% $FILES->FileSize %></td><% empty_td(width=>4) %>
+    <td class="smallfont" align="right" bgcolor="#FFF0FF"><% $FILES->FileDate %></td><% empty_td(width=>4) %>
+    <td class="memo" bgcolor="#F0FFFF"><% $FILES->Memo %>
+    <% img(src=>'/images/ePortal/edit.gif', href=>href('file_edit.htm', objid=>$FILES->id)) %>
+    </td><% empty_td(width=>4) %>
+  </tr>
+% }
+</table>
+<p>
+% }
+
+%#=== @metags onStartRequest ====================================================
+<%method onStartRequest><%perl>
+
+</%perl></%method>
+
+%#=== @METAGS attr =========================================================
+<%attr>
+Title => {rus => "Название", eng => "Title"}
+</%attr>

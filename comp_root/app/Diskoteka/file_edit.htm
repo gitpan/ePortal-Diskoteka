@@ -1,0 +1,58 @@
+%#============================================================================
+%# ePortal - WEB Based daily organizer
+%# Author - S.Rusakov <rusakov_sa@users.sourceforge.net>
+%#
+%# Copyright (c) 2000-2003 Sergey Rusakov.  All rights reserved.
+%# This program is free software; you can redistribute it
+%# and/or modify it under the same terms as Perl itself.
+%#
+%#
+%#----------------------------------------------------------------------------
+&nbsp;
+<% $dlg->dialog_start( width => 500, title => pick_lang(rus => "Τΰιλ", eng => "File") ) %>
+
+% foreach my $field (qw/medium_id title filesize filedate/) {
+  <% $dlg->field($field, RO => 1) %>
+% }
+
+  <% $dlg->field('memo') %>
+
+<% $dlg->buttons %>
+<% $dlg->dialog_end %>
+<p>
+
+
+%#=== @metags once =========================================================
+<%once>
+my ($dlg, $obj);
+</%once>
+
+
+%#=== @METAGS cleanup =========================================================
+<%cleanup>
+($dlg, $obj) = ();
+</%cleanup>
+
+%#=== @METAGS attr =========================================================
+<%attr>
+Title => {rus => "Τΰιλ", eng => "File"}
+</%attr>
+
+
+%#=== @METAGS onStartRequest ====================================================
+<%method onStartRequest><%perl>
+  $obj = new ePortal::App::Diskoteka::File;
+
+  # Handle Dialog events
+  $dlg = new ePortal::HTML::Dialog( obj => $obj);
+
+  my $location = try {
+    $dlg->handle_request( );
+  } catch ePortal::Exception::DataNotValid with {
+    my $E = shift;
+    $session{ErrorMessage} = $E->text;
+    '';
+  };
+  return $location if $location;
+</%perl></%method>
+

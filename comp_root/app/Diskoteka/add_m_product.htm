@@ -1,0 +1,31 @@
+%#============================================================================
+%# ePortal - WEB Based daily organizer
+%# Author - S.Rusakov <rusakov_sa@users.sourceforge.net>
+%#
+%# Copyright (c) 2000-2003 Sergey Rusakov.  All rights reserved.
+%# This program is free software; you can redistribute it
+%# and/or modify it under the same terms as Perl itself.
+%#
+%#
+%#----------------------------------------------------------------------------
+<%method onStartRequest><%perl>
+  my $P = new ePortal::App::Diskoteka::Product;
+  $P->restore($ARGS{product_id});
+
+  my $M = new ePortal::App::Diskoteka::Medium;
+  $M->restore($ARGS{medium_id});
+
+  my $A = new ePortal::App::Diskoteka::Archive;
+  $A->restore($ARGS{archive_id});
+
+  if ( $P->check_id) {
+    $M->htmlSave( product_id => $P->id );
+    $M->htmlSave( archive_id => $P->Archive_id );
+  } else {
+    $M->htmlSave( archive_id => $A->id );
+  }
+  $M->update;
+
+  return $ARGS{done} || $ENV{HTTP_REFFERER} || 'index.htm';
+</%perl></%method>
+

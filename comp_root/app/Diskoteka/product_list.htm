@@ -1,0 +1,24 @@
+%#============================================================================
+%# ePortal - WEB Based daily organizer
+%# Author - S.Rusakov <rusakov_sa@users.sourceforge.net>
+%#
+%# Copyright (c) 2000-2003 Sergey Rusakov.  All rights reserved.
+%# This program is free software; you can redistribute it
+%# and/or modify it under the same terms as Perl itself.
+%#
+%#
+%#----------------------------------------------------------------------------
+<& navigator.mc &>
+
+<p>
+
+<& show_products.mc,
+    url => "product_view.htm?product_id=#id#",
+    title => pick_lang(rus => "Программное обеспечение", eng => "Software products")
+    &>
+
+%#=== @METAGS attr =========================================================
+<%attr>
+Title => {rus => "Список ПО", eng => "List of software"}
+</%attr>
+

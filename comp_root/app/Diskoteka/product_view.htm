@@ -1,0 +1,151 @@
+%#============================================================================
+%# ePortal - WEB Based daily organizer
+%# Author - S.Rusakov <rusakov_sa@users.sourceforge.net>
+%#
+%# Copyright (c) 2000-2003 Sergey Rusakov.  All rights reserved.
+%# This program is free software; you can redistribute it
+%# and/or modify it under the same terms as Perl itself.
+%#
+%#
+%#----------------------------------------------------------------------------
+<%perl>
+  $app = $ePortal->Application('Diskoteka');
+
+  $product = new ePortal::App::Diskoteka::Product;
+  if (! $product->restore($ARGS{product_id})) {
+    $m->comp("/message.mc", ErrorMessage => "Product not found");
+    return;
+  }
+
+  $archive = new ePortal::App::Diskoteka::Archive;
+  if (! $archive->restore($product->archive_id)) {
+    $m->comp("/message.mc", ErrorMessage => "Archive not found");
+    return;
+  }
+
+  $obj = new ePortal::ThePersistent::Support(
+    DBISource => 'Diskoteka',
+    SQL => qq{SELECT Medium.*,
+        count(File.id) as file_count,
+        sum(File.FileSize) as file_size
+        FROM Medium
+        left join File on Medium.id = File.Medium_id
+    },
+    GroupBy => "Medium.Title",
+    Where => "product_id=?",
+    Bind => [$ARGS{product_id}],
+    );
+
+  $list = new ePortal::HTML::List(obj => $obj, class => "smallfont",
+    edit_url => "product_edit.htm",
+    state => {product_id => $ARGS{product_id} },
+    );
+  $list->add_column_image();
+  $list->add_column( id => "title",
+    title => pick_lang(rus => "Название", eng => "Title"),
+    url => "product_edit.htm?objid=#id#", sorting => 1);
+  $list->add_column( id => "file_count",
+    title => pick_lang(rus => "Файлов", eng => "Files"));
+  $list->add_column( id => "file_size",
+      title => pick_lang(rus => "Размер", eng => "Size"),
+      align => 'center',
+      sorting => 1);
+  $list->add_column_system(
+    edit => 1,
+    delete => 1);
+
+  my $location = $list->handle_request;
+  return $location if $location;
+
+  $obj->restore_where( $list->restore_parameters);
+</%perl>
+
+%#============================================================================
+
+<& navigator.mc &>
+<p>
+
+<table border="0" width="99%">
+<tr>
+  <td colspan="3">
+    <& /item_caption.mc,
+      title => pick_lang(rus => "Информация о продукте", eng => "Software info") &>
+  </td>
+</tr>
+
+<tr>
+  <% empty_td(width=>30) %>
+  <td class="dlglabel"><% pick_lang(rus => "Наименование", eng => "Name") %>:</td>
+  <td class="dlgfield"><% $product->Title %></td>
+</tr>
+
+<tr>
+  <% empty_td(width=>30) %>
+  <td class="dlglabel"><% pick_lang(rus => "Входит в архив", eng => "In archive") %>:</td>
+  <td class="dlgfield"><% $archive->Title %></td>
+</tr>
+
+<% empty_tr(height => 12) %>
+
+<tr>
+  <td colspan="3">
+    <& /item_caption.mc,
+      title => pick_lang(rus => "Носители продукта", eng => "Mediums of the product"),
+      extra => $product->Title &>
+  </td>
+</tr>
+
+<tr>
+  <% empty_td(width=>30) %>
+  <td colspan="2">
+    <& show_mediums.mc,
+      product_id => $ARGS{product_id} &>
+  </td>
+</tr>
+
+% if ($app->countMediums(undef)) {
+<% empty_tr(height => 12) %>
+
+<tr>
+  <td colspan="3">
+    <& /item_caption.mc,
+      extra => "Вы можете добавить эти носители к данному продукту",
+      title => pick_lang(rus => "Загруженные носители", eng => "Loaded mediums") &>
+  </td>
+</tr>
+
+<tr>
+  <% empty_td(width=>30) %>
+  <td colspan="2">
+    <& show_mediums.mc,
+      archive_id => undef,
+      url => href("/app/Diskoteka/add_m_product.htm",
+          done => $ENV{REQUEST_URI},
+          medium_id => '#id#',
+          product_id => $product->id) &>
+  </td>
+</tr>
+% } # if undivided mediums found
+
+</table>
+
+<p>
+
+
+%#=== @METAGS attr =========================================================
+<%attr>
+Title => {rus => "Программный продукт", eng => "software"}
+</%attr>
+
+
+
+%#=== @metags once =========================================================
+<%once>
+my ($app, $list, $obj, $search_object, $product, $medium, $archive);
+</%once>
+
+%#=== @metags cleanup =========================================================
+<%cleanup>
+($app, $list, $obj, $search_object, $product, $medium, $archive) = ();
+</%cleanup>
+

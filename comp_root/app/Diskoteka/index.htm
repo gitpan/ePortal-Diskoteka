@@ -1,0 +1,79 @@
+%#============================================================================
+%# ePortal - WEB Based daily organizer
+%# Author - S.Rusakov <rusakov_sa@users.sourceforge.net>
+%#
+%# Copyright (c) 2000-2003 Sergey Rusakov.  All rights reserved.
+%# This program is free software; you can redistribute it
+%# and/or modify it under the same terms as Perl itself.
+%#
+%#
+%#----------------------------------------------------------------------------
+<& navigator.mc &>
+
+<p>
+<& /item_caption.mc,
+  title => pick_lang(rus => "Список архивов", eng => "List of archives") &>
+
+<% $list->draw_list %>
+<div class="app_description">
+Приложение "Дискотека" предназначено для ведения архивов содержимого
+носителей информации (дискеты, компакт-диски), а также поиска носителя по
+названию программного продукта или имени файла.
+</div>
+<p>
+<div class="app_description">
+Для регистрации своих собственных архивов необходимо зарегистрироваться.
+</div>
+
+<& /inset.mc &>
+
+%#=== @metags onStartRequest ====================================================
+<%method onStartRequest><%perl>
+  my $app = $ePortal->Application('Diskoteka');
+  $obj = $app->stArchives;
+
+  $list = new ePortal::HTML::List(obj => $obj, class => "smallfont",
+    edit_url => "archive_edit.htm");
+  $list->add_column_image();
+  $list->add_column( id => "title",
+    title => pick_lang(rus => "Название", eng => "Title"),
+    url => "archive.htm?archive_id=#id#", sorting => 1);
+  $list->add_column( id => "medium_count",
+      title => pick_lang(rus => "Носителей", eng => "Mediums"),
+      align => 'center',
+      sorting => 1);
+  $list->add_column( id => "loaddate",
+      title => pick_lang(rus => "Посл.носитель", eng => "Last medium"),
+      align => 'center',
+      sorting => 1);
+  $list->add_column_yesno( id => "private",
+      title => pick_lang(rus => "Личный", eng => "Private"));
+  $list->add_column_system(
+    objtype => 'ePortal::App::Diskoteka::Archive',
+    edit => sub{ shift->xacl_check_update },
+    delete => sub{ shift->xacl_check_delete });
+
+  my $location = $list->handle_request;
+  return $location if $location;
+
+  $obj->restore_where( $list->restore_parameters);
+</%perl></%method>
+
+
+%#=== @METAGS attr =========================================================
+<%attr>
+Title => {rus => "Архивы носителей информации", eng => "Archives"}
+</%attr>
+
+
+
+%#=== @metags once =========================================================
+<%once>
+my ($app, $list, $obj);
+</%once>
+
+%#=== @metags cleanup =========================================================
+<%cleanup>
+($app, $list, $obj) = ();
+</%cleanup>
+

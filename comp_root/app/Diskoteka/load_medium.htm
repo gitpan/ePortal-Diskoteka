@@ -1,0 +1,32 @@
+%#============================================================================
+%# ePortal - WEB Based daily organizer
+%# Author - S.Rusakov <rusakov_sa@users.sourceforge.net>
+%#
+%# Copyright (c) 2000-2003 Sergey Rusakov.  All rights reserved.
+%# This program is free software; you can redistribute it
+%# and/or modify it under the same terms as Perl itself.
+%#
+%#
+%#----------------------------------------------------------------------------
+<& navigator.mc &>
+
+<p>
+<& /item_caption.mc,
+  title => pick_lang(rus => "Как загрузить носитель?", eng => "How to load a medium?") &>
+  <ul>
+  <li><a href="mload.pl"><% pick_lang(rus => "Программа - загрузчик (PL)", eng => "Loader (Perl script)") %></a>
+  <li><a href="mload.exe"><% pick_lang(rus => "Программа - загрузчик (EXE)", eng => "Loader (EXE) if available") %></a>
+  </UL>
+
+<p>
+<& /item_caption.mc,
+  title => pick_lang(rus => "Загруженные носители", eng => "Loaded mediums") &>
+<& show_mediums.mc,
+    url => "medium_view.htm?medium_id=#id#",
+    archive_id => undef &>
+
+
+%#=== @METAGS attr =========================================================
+<%attr>
+Title => {rus => "Список носителей", eng => "List of mediums"}
+</%attr>

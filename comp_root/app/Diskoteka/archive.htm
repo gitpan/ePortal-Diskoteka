@@ -1,0 +1,89 @@
+%#============================================================================
+%# ePortal - WEB Based daily organizer
+%# Author - S.Rusakov <rusakov_sa@users.sourceforge.net>
+%#
+%# Copyright (c) 2000-2003 Sergey Rusakov.  All rights reserved.
+%# This program is free software; you can redistribute it
+%# and/or modify it under the same terms as Perl itself.
+%#
+%#
+%#----------------------------------------------------------------------------
+<& navigator.mc &>
+<p>
+<%perl>
+  my $app = $ePortal->Application('Diskoteka');
+
+  my $A = new ePortal::App::Diskoteka::Archive;
+  if ( ! $A->restore($ARGS{archive_id} )) {
+    $m->comp("/message.mc", ErrorMessage => "Archive not found");
+    return;
+  }
+
+
+</%perl>
+
+<& /item_caption.mc, title => pick_lang(rus => "Архив", eng => "Archive"), &>
+<table width="80%" border="0">
+
+<tr>
+  <td class="dlglabel" width="50%"><% pick_lang(rus => "Наименование", eng => "Name") %>:</td>
+  <td class="dlgfield" width="50%"><% $A->Title %></td>
+</tr>
+
+<tr>
+  <td class="dlglabel" width="50%"><% pick_lang(rus => "Кол-во носителей", eng => "Mediums count") %>:</td>
+  <td class="dlgfield" width="50%"><% $app->countMediums($A->id) %></td>
+</tr>
+
+</table>
+
+<& /item_caption.mc, title => pick_lang(rus => "Поиск", eng => "Search") &>
+<form name="theForm" method="GET">
+<div align="center">
+<span class="smallfont">
+<% pick_lang(rus => "Что искать?", eng => "Text to search") %>:
+</span>
+<% CGI::textfield({-name => 'text', -size => 15, -class=>"dlgfield", -value=>$ARGS{text}}) %>
+<% CGI::hidden({-name => 'archive_id', -value => $ARGS{archive_id} }) %>
+<input type="submit" name="bt_search" class="button" value="<% pick_lang(rus => "Искать!", eng => "Search!") %>">
+</div>
+</form>
+
+<script language="Javascript">
+<!--
+ document.theForm.text.focus();
+// -->
+</script>
+
+
+
+<p>
+<& /item_caption.mc, title => pick_lang(rus => "Носители", eng => "Mediums"), &>
+<& show_mediums.mc,
+    archive_id => $ARGS{archive_id},
+    $ARGS{text} ? ( text => $ARGS{text}) : (),
+     &>
+
+
+% if ($app->countMediums(undef)) {
+<% empty_tr(height => 12) %>
+
+<& /item_caption.mc,
+  extra => "Вы можете добавить эти носители к данному архиву",
+  title => pick_lang(rus => "Загруженные носители", eng => "Loaded mediums") &>
+
+<& show_mediums.mc,
+  archive_id => undef,
+  url => href("/app/Diskoteka/add_m_product.htm",
+      done => $ENV{REQUEST_URI},
+      medium_id => '#id#',
+      archive_id => $ARGS{archive_id}) &>
+
+% } # if undivided mediums found
+
+
+%#=== @METAGS attr =========================================================
+<%attr>
+Title => {rus => "Архив", eng => "Archive"}
+</%attr>
+
