@@ -12,7 +12,7 @@
 
 
 package ePortal::App::Diskoteka;
-    our $VERSION = '4.1';
+    our $VERSION = '4.2';
 
     use base qw/ePortal::Application/;
     use File::Basename qw//;
@@ -236,7 +236,7 @@ sub UploadMedium    {   #02/13/03 8:29
                 $FILE->Title("$filepath$filename/");
             } else {
                 if ($PARENT->Title ne $filepath) {
-                    $PARENT->restore_where(medium_id=>$medium->id, title => $filepath);
+                    $PARENT->restore_where(where => 'medium_id=? and title=?', bind => [$medium->id, $filepath]);
                     throw ePortal::Exception(-text => "Cannot find parent for $path")
                         if ! $PARENT->restore_next;
                 }

@@ -32,3 +32,4 @@ lib/ePortal/App/Diskoteka/File.pm
 lib/ePortal/App/Diskoteka/Medium.pm
 lib/ePortal/App/Diskoteka/Product.pm
 target
+META.yml                                 Module meta-data (added by MakeMaker)

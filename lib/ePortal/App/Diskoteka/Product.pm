@@ -12,7 +12,7 @@
 
 
 package ePortal::App::Diskoteka::Product;
-    our $VERSION = '4.1';
+    our $VERSION = '4.2';
     use base qw/ePortal::ThePersistent::ParentACL/;
 
     use ePortal::Utils;
